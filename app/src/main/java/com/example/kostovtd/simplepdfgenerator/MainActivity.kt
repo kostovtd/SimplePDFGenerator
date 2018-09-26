@@ -1,18 +1,24 @@
 package com.example.kostovtd.simplepdfgenerator
 
+import android.graphics.pdf.PdfDocument
 import android.os.Bundle
+import android.os.Environment
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
 
-class MainActivity: AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         buttonEmptyPdf.setOnClickListener {
-            Toast.makeText(this@MainActivity, "Empty PDF clicked", Toast.LENGTH_LONG).show()
+            createEmptyPdf()
         }
 
         buttonPdfWithText.setOnClickListener {
@@ -22,5 +28,33 @@ class MainActivity: AppCompatActivity() {
         buttonPdfWithImage.setOnClickListener {
             Toast.makeText(this@MainActivity, "PDF with image clicked", Toast.LENGTH_LONG).show()
         }
+    }
+
+
+    private fun createEmptyPdf() {
+        Log.d(TAG, "createEmptyPdf: hit")
+        val pdfDocument = PdfDocument()
+        val pageInfo = PdfDocument.PageInfo.Builder(100, 100, 1).create()
+        val page = pdfDocument.startPage(pageInfo)
+
+        pdfDocument.finishPage(page)
+
+        try {
+            val fileName = "empty"
+            val fileExtension = ".pdf"
+            val storageDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+            val file = File.createTempFile(fileName, fileExtension, storageDir)
+            val fileOutputStream = FileOutputStream(file)
+            pdfDocument.writeTo(fileOutputStream)
+            pdfDocument.close()
+            Snackbar()
+        } catch (e: FileNotFoundException) {
+            Log.e(TAG, e.message)
+        }
+    }
+
+
+    companion object {
+        private val TAG = MainActivity::class.java.simpleName
     }
 }
